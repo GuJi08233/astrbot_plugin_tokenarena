@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Plugin runtime data (device_id 等由插件在运行目录生成)
+device_id
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+name: astrbot_plugin_tokenarena
+display_name: TokenArena 用量上报
+author: Donzin
+version: 1.0.0
+desc: 自动收集 AstrBot 的 LLM token 用量并定时上传到 TokenArena 开放 API。仅需配置服务 URL、API Key 与同步间隔即可自动同步。
+repo: https://github.com/GuJi08233/astrbot_plugin_tokenarena
+astrbot_version: ">=4.16,<5"
