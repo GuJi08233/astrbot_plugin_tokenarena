@@ -1,5 +1,6 @@
 import asyncio
 import hashlib
+import os
 import socket
 import uuid
 from collections import defaultdict
@@ -94,6 +95,7 @@ class TokenArenaPlugin(Star):
             "[TokenArena] 状态",
             f"- 服务地址: {base_url or '(未配置)'}",
             f"- API Key: {configured}",
+            f"- 代理: {self._describe_proxy()}",
             f"- 自动同步: {auto}（间隔 {interval} 分钟）",
             f"- 设备 ID: {self._device_id}",
             f"- 上次同步: {last}",
@@ -165,7 +167,11 @@ class TokenArenaPlugin(Star):
             }
 
             url = f"{base_url}/api/usage/ingest"
-            async with httpx.AsyncClient(timeout=30) as client:
+            # proxy 为 None 时 httpx 走 trust_env，即跟随 AstrBot 的全局代理。
+            proxy = (self.config.get("proxy") or "").strip() or None
+            if proxy:
+                logger.debug(f"[TokenArena] 使用代理: {proxy}")
+            async with httpx.AsyncClient(timeout=30, proxy=proxy) as client:
                 resp = await client.post(
                     url,
                     json=payload,
@@ -240,6 +246,26 @@ class TokenArenaPlugin(Star):
     # ====
     # 工具方法
     # ====
+
+    def _describe_proxy(self) -> str:
+        """描述当前生效的代理，供 status 展示。"""
+        configured = (self.config.get("proxy") or "").strip()
+        if configured:
+            return self._mask_proxy(configured)
+        # AstrBot 的全局代理是写进环境变量的，httpx 默认会跟随。
+        inherited = os.environ.get("https_proxy") or os.environ.get("http_proxy")
+        if inherited:
+            return f"跟随全局设置（{self._mask_proxy(inherited)}）"
+        return "未使用"
+
+    @staticmethod
+    def _mask_proxy(proxy: str) -> str:
+        """隐藏代理地址里的账号密码，避免 status 在群聊中泄露凭据。"""
+        if "@" not in proxy:
+            return proxy
+        scheme, sep, rest = proxy.rpartition("://")
+        host = rest.rpartition("@")[2]
+        return f"{scheme}{sep}***@{host}"
 
     @staticmethod
     def _ensure_utc(value: datetime) -> datetime:

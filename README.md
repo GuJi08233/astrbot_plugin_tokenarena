@@ -20,11 +20,23 @@ TokenArena 的 ingest 接口使用唯一键做 **幂等 upsert**（同一时间�
 | --- | --- | --- |
 | `base_url` | TokenArena 服务地址，无需带 `/api/usage/ingest` 后缀 | `https://tokenarena.app` |
 | `api_key` | TokenArena API Key（在 Settings → CLI Keys 中创建） | 空 |
+| `proxy` | 上报请求使用的 HTTP/SOCKS5 代理，留空则跟随 AstrBot 全局代理 | 空 |
 | `sync_interval_minutes` | 自动同步间隔（分钟） | `30` |
 | `lookback_days` | 每次同步回溯统计的天数 | `2` |
 | `source_name` | 上报来源标识，用于在仪表盘区分数据来源 | `astrbot` |
 | `device_id` | 设备 ID，留空则按机器名自动生成稳定 ID | 空 |
 | `enable_auto_sync` | 是否启用后台自动同步 | `true` |
+
+## 代理
+
+上报请求默认跟随 AstrBot 的全局代理（设置 → 网络 → `http_proxy`）：AstrBot 会把它写进环境变量，httpx 自动使用，无需在插件里重复配置。
+
+只有当本插件需要走**不同于全局**的代理时（例如全局直连，但访问 `tokenarena.app` 需要代理），才需要填写插件配置中的 `proxy`：
+
+- HTTP：`http://127.0.0.1:7890`
+- SOCKS5：`socks5://127.0.0.1:1080`
+
+填写后优先于全局设置，且只影响本插件。`/tokenarena status` 会显示当前实际生效的代理，其中的账号密码会被脱敏。
 
 ## 数据映射
 
@@ -52,4 +64,4 @@ TokenArena 的 ingest 接口使用唯一键做 **幂等 upsert**（同一时间�
 
 ## 依赖
 
-- `httpx`（异步 HTTP 客户端）
+- `httpx[socks]`（异步 HTTP 客户端；`socks` 附加项用于 SOCKS5 代理支持）

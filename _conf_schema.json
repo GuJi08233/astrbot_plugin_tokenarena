@@ -11,6 +11,12 @@
     "hint": "在 TokenArena 的 Settings -> CLI Keys 中创建，用于 Bearer 认证",
     "default": ""
   },
+  "proxy": {
+    "description": "HTTP 代理（可选）",
+    "type": "string",
+    "hint": "仅对本插件的上报请求生效，例如 http://127.0.0.1:7890 或 socks5://127.0.0.1:1080。留空则跟随 AstrBot 的全局代理设置（设置 → 网络 → http_proxy）。",
+    "default": ""
+  },
   "sync_interval_minutes": {
     "description": "自动同步间隔（分钟）",
     "type": "int",
