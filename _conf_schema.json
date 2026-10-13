@@ -2,8 +2,8 @@
   "base_url": {
     "description": "TokenArena 服务地址",
     "type": "string",
-    "hint": "例如 https://tokenarena.app 或自建实例地址，无需带 /api/usage/ingest 后缀",
-    "default": "https://tokenarena.app"
+    "hint": "例如 https://token.guji.uno 或自建实例地址，无需带 /api/usage/ingest 后缀。公网建议使用 HTTPS；已有服务地址不会自动替换。",
+    "default": "https://token.guji.uno"
   },
   "api_key": {
     "description": "TokenArena API Key",
@@ -12,10 +12,16 @@
     "default": ""
   },
   "proxy": {
-    "description": "HTTP 代理（可选）",
+    "description": "独立代理（可选）",
     "type": "string",
-    "hint": "仅对本插件的上报请求生效，例如 http://127.0.0.1:7890 或 socks5://127.0.0.1:1080。留空则跟随 AstrBot 的全局代理设置（设置 → 网络 → http_proxy）。",
+    "hint": "仅对本插件生效，支持 http://、https://、socks5://、socks5h://，例如 http://127.0.0.1:7890。填写后优先于环境代理和 NO_PROXY；留空时由“使用环境代理”决定继承环境还是直连。",
     "default": ""
+  },
+  "use_env_proxy": {
+    "description": "使用环境代理",
+    "type": "bool",
+    "hint": "独立代理为空时，开启则继承 AstrBot / 系统的 HTTP_PROXY、HTTPS_PROXY、ALL_PROXY，并尊重 NO_PROXY；关闭则直连。独立代理非空时始终优先使用独立代理。",
+    "default": true
   },
   "sync_interval_minutes": {
     "description": "自动同步间隔（分钟）",
@@ -26,19 +32,19 @@
   "lookback_days": {
     "description": "每次同步回溯天数",
     "type": "int",
-    "hint": "每次同步会重新统计最近 N 天的用量并幂等覆盖上传，确保数据完整。建议 1-3 天。",
+    "hint": "每次重新统计最近 N 天，起点向下对齐到 UTC 半小时边界，分批幂等覆盖上传完整时间桶。建议 1-3 天。",
     "default": 2
   },
   "source_name": {
     "description": "上报来源标识",
     "type": "string",
-    "hint": "在 TokenArena 仪表盘中用于区分数据来源，默认 astrbot。",
+    "hint": "在 TokenArena 仪表盘中区分数据来源，默认 astrbot，最多 64 个 UTF-8 字节。已有实例请保持原值，修改会产生新的历史身份。",
     "default": "astrbot"
   },
   "device_id": {
     "description": "设备 ID（可选）",
     "type": "string",
-    "hint": "留空则根据机器名自动生成稳定 ID。同一台 AstrBot 实例请保持不变，否则会被视为不同设备。",
+    "hint": "留空时复用持久化 ID，新实例生成并保存 UUID。最多 128 个 UTF-8 字节；少于 8 字符的自定义值按原规则转换。同一实例请保持不变，否则会被视为不同设备。",
     "default": ""
   },
   "enable_auto_sync": {
